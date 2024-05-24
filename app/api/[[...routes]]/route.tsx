@@ -1,10 +1,11 @@
 /** @jsxImportSource frog/jsx */
 
-import { Button, Frog, TextInput } from 'frog'
+import { Button, Frog, TextInput, parseEther } from 'frog'
 import { devtools } from 'frog/dev'
 // import { neynar } from 'frog/hubs'
 import { handle } from 'frog/next'
 import { serveStatic } from 'frog/serve-static'
+import { abi } from './abi'
 
 const app = new Frog({
   assetsPath: '/',
@@ -57,14 +58,30 @@ app.frame('/', (c) => {
       </div>
     ),
     intents: [
-      <TextInput placeholder="Enter custom fruit..." />,
       <Button value="apples">Apples</Button>,
       <Button value="oranges">Oranges</Button>,
       <Button value="bananas">Bananas</Button>,
+      <Button.Transaction target="/mint">Mint</Button.Transaction>,
       status === 'response' && <Button.Reset>Reset</Button.Reset>,
     ],
   })
 })
+
+app.transaction('/mint', (c) => {
+  const { inputText } = c
+  // Contract transaction response.
+  return c.contract({
+    abi,
+    chainId: 'eip155:10',
+    functionName: 'mint',
+    // args: [69420n],
+    args: [69420],
+    to: '0xd2135CfB216b74109775236E36d4b433F1DF507B',
+    value: parseEther(inputText as string)
+    // value: parseEther('1')
+  })
+})
+
 
 devtools(app, { serveStatic })
 
